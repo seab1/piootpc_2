@@ -2,9 +2,10 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
 
+@SuppressWarnings("serial")
 @Entity
 @Table(name="schoolClasses")
-public class SchoolClass {
+public class SchoolClass implements java.io.Serializable {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -19,13 +20,16 @@ public class SchoolClass {
 	@Column
 	private String profile;
 	
-	@ManyToMany(mappedBy="classes", cascade={CascadeType.PERSIST, CascadeType.MERGE})
-	private Set<Teacher> teachers = new HashSet<Teacher>();
-	
 	@OneToMany(cascade=CascadeType.ALL)
 	@JoinColumn(name="class_id")
 	private Set<Student> students = new HashSet<Student>();
 	
+	@ManyToMany(mappedBy="classes", cascade={CascadeType.PERSIST, CascadeType.MERGE})
+	private Set<Teacher> teachers = new HashSet<Teacher>();
+
+	public SchoolClass() {
+	}
+
 	public long getId() {
 		return id;
 	}
@@ -57,7 +61,7 @@ public class SchoolClass {
 	public void setProfile(String profile) {
 		this.profile = profile;
 	}
-
+	
 	public Set<Student> getStudents() {
 		return students;
 	}
@@ -74,10 +78,6 @@ public class SchoolClass {
 		students.remove(student);
 	}
 	
-	public String toString() {
-		return "Class: " + profile + " (Started: " + getStartYear() + ", Current year: " + getCurrentYear() + ")";
-	}
-	
 	public Set<Teacher> getTeachers() {
 		return teachers;
 	}
@@ -85,14 +85,16 @@ public class SchoolClass {
 	public void setTeachers(Set<Teacher> teachers) {
 		this.teachers = teachers;
 	}
-	
-	public void addTeachers(Teacher teacher)
-	{
+
+	public void addTeacher(Teacher teacher) {
 		teachers.add(teacher);
 	}
-	
-	public void removeTeachers(Teacher teacher)
-	{
+
+	public void removeTeacher(Teacher teacher) {
 		teachers.remove(teacher);
+	}
+	
+	public String toString() {
+		return "Class: " + profile + " (Started: " + getStartYear() + ", Current year: " + getCurrentYear() + ")";
 	}
 }

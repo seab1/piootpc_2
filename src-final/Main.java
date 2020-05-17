@@ -16,7 +16,6 @@ public class Main {
 //		main.executeQueries();
 //		main.updateObject();
 //		main.printTeachers();
-//		main.printTeachersFromClasses();
 		main.cascadeTest();
 		main.close();
 	}
@@ -28,6 +27,99 @@ public class Main {
 	public void close() {
 		session.close();
 		HibernateUtil.shutdown();
+	}
+	
+	private void cascadeTest() {
+//		School newSchool1 = new School();
+//		newSchool1.setName("Nowa szko³a 1");
+//		newSchool1.setAddress("ul. Ulica 0, Miasto");
+//		School newSchool2 = new School();
+//		newSchool2.setName("Nowa szko³a 2");
+//		newSchool2.setAddress("ul. Ulica 0, Miasto");
+//		
+//		SchoolClass newClass1 = new SchoolClass();
+//		newClass1.setProfile("profil1");
+//		newClass1.setStartYear(2020);
+//		newClass1.setCurrentYear(1);
+//		SchoolClass newClass2 = new SchoolClass();
+//		newClass2.setProfile("profil2");
+//		newClass2.setStartYear(2020);
+//		newClass2.setCurrentYear(1);
+//		
+//		Student newStudent1 = new Student();
+//		newStudent1.setName("Jan");
+//		newStudent1.setSurname("Pierwszy");
+//		newStudent1.setPesel("12345678901");
+//		Student newStudent2 = new Student();
+//		newStudent2.setName("Jan");
+//		newStudent2.setSurname("Drugi");
+//		newStudent2.setPesel("12345678901");
+//		
+//		newClass1.addStudent(newStudent1);
+//		newClass2.addStudent(newStudent2);
+//		newSchool1.addClass(newClass1);
+//		newSchool2.addClass(newClass2);
+//		
+//		Teacher newTeacher1 = new Teacher();
+//		newTeacher1.setName("Mateusz");
+//		newTeacher1.setSurname("Jeden");
+//		newTeacher1.setPesel("00000000000");
+//		Teacher newTeacher2 = new Teacher();
+//		newTeacher2.setName("Mateusz");
+//		newTeacher2.setSurname("Dwa");
+//		newTeacher2.setPesel("00000000000");
+//		
+//		newClass1.addTeacher(newTeacher1);
+//		newClass1.addTeacher(newTeacher2);
+//		newClass2.addTeacher(newTeacher1);
+//		newClass2.addTeacher(newTeacher2);
+//		newTeacher1.addClass(newClass1);
+//		newTeacher1.addClass(newClass2);
+//		newTeacher2.addClass(newClass1);
+//		newTeacher2.addClass(newClass2);
+//		
+//		Transaction transaction = session.beginTransaction();
+//		session.save(newSchool1);
+//		session.save(newSchool2);
+//		session.save(newTeacher1);
+//		session.save(newTeacher2);
+//		transaction.commit();
+		
+		String hql = "FROM SchoolClass C WHERE C.id=7";
+		Query query = session.createQuery(hql);
+		SchoolClass schoolClass = (SchoolClass) query.uniqueResult();
+				
+		Transaction transaction = session.beginTransaction();
+		for(Teacher teacher : schoolClass.getTeachers()) {
+			teacher.removeClass(schoolClass);
+			session.save(teacher);
+		}
+		session.delete(schoolClass);
+		transaction.commit();
+	}
+	
+	private void printTeachers() {
+		Criteria crit = session.createCriteria(Teacher.class);
+		List<Teacher> teachers = crit.list();
+
+		System.out.println("### Teachers");
+		for (Teacher teacher : teachers) {
+			System.out.println(teacher);
+			for (SchoolClass schoolClass : teacher.getClasses()) {
+				System.out.println("    " + schoolClass);
+			}
+		}
+		
+		Criteria crit2 = session.createCriteria(SchoolClass.class);
+		List<SchoolClass> schoolClasses = crit2.list();
+
+		System.out.println("### Classes");
+		for (SchoolClass schoolClass : schoolClasses) {
+			System.out.println(schoolClass);
+			for (Teacher teacher : schoolClass.getTeachers()) {
+				System.out.println("    " + teacher);
+			}
+		}
 	}
 
 	private void executeQueries() {
@@ -140,71 +232,5 @@ public class Main {
 				}
 			}
 		}
-	}
-	
-	private void printTeachers() {
-		Criteria crit = session.createCriteria(Teacher.class);
-		List<Teacher> teachers = crit.list();
-
-		System.out.println("### Teachers and classes");
-		for (Teacher teacher : teachers) {
-			System.out.println(teacher);
-			for (SchoolClass schoolClass : teacher.getClasses()) {
-				System.out.println("    " + schoolClass);
-			}
-		}
-	}
-	
-	private void printTeachersFromClasses() {
-		Criteria crit = session.createCriteria(SchoolClass.class);
-		List<SchoolClass> classes = crit.list();
-
-		System.out.println("### Classes and teachers");
-		for (SchoolClass schoolClass : classes) {
-			System.out.println(schoolClass);
-			for (Teacher teacher : schoolClass.getTeachers()) {
-				System.out.println("    " + teacher);
-			}
-		}
-	}
-	
-	public void cascadeTest()
-	{
-		School newSchool = new School();
-		newSchool.setName("Nowa szko³a");
-		newSchool.setAddress("ul. Ulica 0, Miasto");
-		
-		SchoolClass newClass = new SchoolClass();
-		newClass.setProfile("profil");
-		newClass.setStartYear(2020);
-		newClass.setCurrentYear(1);
-		
-		Student newStudent = new Student();
-		newStudent.setName("Jan");
-		newStudent.setSurname("Kowalski");
-		newStudent.setPesel("12345678901");
-		
-		Teacher newTeacher = new Teacher();
-		newTeacher.setName("Janusz");
-		newTeacher.setSurname("Kowalski");
-		newTeacher.setPesel("22345678901");
-		
-		newClass.addStudent(newStudent);
-		newClass.addTeachers(newTeacher);
-		newTeacher.addClass(newClass);
-		newSchool.addClass(newClass);
-		
-		/*String hql = "FROM School S WHERE S.name='Nowa szko³a'";
-		Query query = session.createQuery(hql);
-		List<School> results = query.list();
-		Transaction transaction = session.beginTransaction();
-		for (School s : results) {
-			session.delete(s);
-		}*/
-		
-		Transaction transaction = session.beginTransaction();
-		session.save(newSchool);
-		session.save(newTeacher);
-		transaction.commit();
 	}
 }

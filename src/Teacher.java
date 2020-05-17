@@ -4,8 +4,8 @@ import java.util.Set;
 import javax.persistence.*;
 
 @Entity
-@Table(name="students")
-public class Student {
+@Table(name="teachers")
+public class Teacher {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -19,8 +19,16 @@ public class Student {
 	
 	@Column
 	private String pesel;
+
+	@ManyToMany(cascade={CascadeType.PERSIST, CascadeType.MERGE})
+	@JoinTable(
+	name="schoolClasses_teachers",
+	joinColumns=@JoinColumn(name="teacher_id"),
+	inverseJoinColumns=@JoinColumn(name="schoolClass_id")
+	)
+	Set<SchoolClass> classes = new HashSet<SchoolClass>();
 	
-	public Student() {
+	public Teacher() {
 	}
 	
 	public long getId() {
@@ -54,8 +62,26 @@ public class Student {
 	public void setPesel(String pesel) {
 		this.pesel = pesel;
 	}
+	
+	public Set<SchoolClass> getClasses() {
+		return classes;
+	}
+
+	public void setClasses(Set<SchoolClass> classes) {
+		this.classes = classes;
+	}
+	
+	public void addClass(SchoolClass schoolClass)
+	{
+		classes.add(schoolClass);
+	}
+	
+	public void removeClass(SchoolClass schoolClass)
+	{
+		classes.remove(schoolClass);
+	}
 
 	public String toString() {
-		return "Student: " + getName() + " " + getSurname() + " (" + getPesel() + ")";
+		return "Teacher: " + getName() + " " + getSurname() + " (" + getPesel() + ")";
 	}
 }

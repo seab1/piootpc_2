@@ -15,5 +15,6 @@
 		<mapping class="School"/>
 		<mapping class="SchoolClass"/>
 		<mapping class="Student"/>
+		<mapping class="Teacher"/>
 	</session-factory>
 </hibernate-configuration>
